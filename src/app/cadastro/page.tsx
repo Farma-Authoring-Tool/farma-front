@@ -1,10 +1,48 @@
+'use client'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { api } from '../service/api';
 
 export default function Registration() {
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    
+    const newUser = {
+      user: {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        password_confirmation: formData.get('passwordConfirmation')
+      }
+    };
+
+    if (formData.get('password') !== formData.get('passwordConfirmation')) {
+      setError('As senhas não coincidem.');
+      return;
+    }
+
+    try {
+      const response = await api.post('/signup', newUser);
+      if (response.status === 201) {
+        router.push('/login');
+      } else {
+        setError('Erro ao criar conta. Por favor, tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao criar conta:', error);
+      setError('Erro ao criar conta. Por favor, tente novamente.');
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-20">
-      <form>
+      <form  onSubmit={handleSubmit}>
         <div className="rounded-xl border border-farma pt-8 pb-8 pr-24 pl-24">
           <div className="space-y-12">
             <div className="border-b border-gray-900/10 pb-12">
@@ -57,9 +95,9 @@ export default function Registration() {
                     <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-green-600 sm:max-w-md">
                       <input
                         type="password"
-                        name="name"
-                        id="name"
-                        autoComplete="name"
+                        name="password"
+                        id="password"
+                        autoComplete="password"
                         className="pl-2 block flex-1 border-0 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                       />
                     </div>
@@ -74,9 +112,9 @@ export default function Registration() {
                     <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-green-600 sm:max-w-md">
                       <input
                         type="password"
-                        name="name"
-                        id="name"
-                        autoComplete="name"
+                        name="passwordConfirmation"
+                        id="passwordConfirmation"
+                        autoComplete="password"
                         className="pl-2 block flex-1 border-0 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                       />
                     </div>
@@ -94,11 +132,9 @@ export default function Registration() {
               </button>
             </Link>
 
-            <Link href="/login">
-              <button type="submit" className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
+            <button type="submit" className="rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
               Salvar
-              </button>
-            </Link>
+            </button>
           </div>
         </div>
       </form>
