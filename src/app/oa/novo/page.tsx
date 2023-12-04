@@ -1,43 +1,47 @@
 'use client'
-import ErrorNotFound from "@/app/components/404";
 import Sidebar from "@/app/components/sidebar";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { apiProfessorsLos } from "@/app/service/api";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Create() {
-
-  const [los, setLos] = useState([]);
-
-  const { isAuthenticated, user, loading } = useAuth();
+  const router = useRouter();
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
-    if(!isAuthenticated && !loading){
-        redirect('/login');
+    if (!isAuthenticated && !loading) {
+      router.push('/login');
     }
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated, loading, router]);
 
-  useEffect(() => {
-      const fetchLos = async () => {
-          try {
-              const response = await apiProfessorsLos.getAll();
-              setLos(response.data);
-          } catch (error) {
-              console.error('Erro ao buscar OAs:', error);
-              <ErrorNotFound />
-          }
-      };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const newLo = {
+      lo: {
+        title: formData.get('title'),
+        description: formData.get('description')
+      }
+    };
 
-      fetchLos();
-  }, []);
+    try {
+      const response = await apiProfessorsLos.create(newLo);
+      if (response.status === 201) {
+        router.push('/oa');
+      }
+    } catch (error) {
+      console.error('Erro ao criar OA:', error);
+      alert('Erro ao criar o Objeto de Aprendizagem.');
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 p-8 ml-64">
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="space-y-12">
             <div className="border-b border-gray-900/10 pb-12">
               <h2 className="text-base font-semibold leading-7 text-gray-900">Objeto de Aprendizagem</h2>

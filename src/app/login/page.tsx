@@ -1,6 +1,5 @@
 'use client'
 import Image from 'next/image'
-import Link from 'next/link'
 import LoginForm from './component/loginForm';
 
 export default function Login() {

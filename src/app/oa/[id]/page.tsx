@@ -8,11 +8,9 @@ import { redirect } from 'next/navigation';
 import { apiProfessorsLos } from '@/app/service/api';
 import ErrorNotFound from '@/app/components/404';
 
-
-export default function Lo({ id }) {
+export default function Lo({params}: any) {
   const [lo, setLo] = useState(null);
   const [error, setError] = useState('');
-
   const { isAuthenticated, user, loading } = useAuth();
 
   useEffect(() => {
@@ -21,21 +19,20 @@ export default function Lo({ id }) {
     }
   }, [isAuthenticated, loading]);
 
-  useEffect(() => {
-    const fetchLo = async () => {
-      try {
-        const response = await apiProfessorsLos.get(id);
-        setLo(response.data);
-      } catch (error) {
-        console.error('Erro ao buscar OA:', error);
-        setError('Erro ao buscar informações do OA.');
-      }
-    };
+  const fetchLo = async () => {
+    try {
+      const response = await apiProfessorsLos.get(params.id);
 
-    if (id) {
-      fetchLo();
+      setLo(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar OA:', error);
+      setError('Erro ao buscar informações do OA.');
     }
-  }, [id]);
+  };
+
+  useEffect(() => {
+    fetchLo();
+  }, []);
 
   if (error) {
     return <ErrorNotFound />;
